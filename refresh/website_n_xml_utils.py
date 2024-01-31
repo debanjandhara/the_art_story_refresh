@@ -184,13 +184,14 @@ def filter_and_store_paths(callback):
                 extracted_xml_id = convert_to_underscore(extracted_id)
                 output = f"\nType : {extracted_type} ; ID : {extracted_xml_id}"
                 callback(output)
-                if (is_value_in_csv(extracted_id) == False):
-                    print(f"\nValue : \"{extracted_xml_id}\" not Found in DB")
+                # change here
+                if (is_value_in_csv(extracted_xml_id) == False):
+                    print(f"\nIts a New Value. Value : \"{extracted_xml_id}\" not Found in DB")
                     # update_record(extracted_id, str(datetime.now().strftime("%d %B %Y %H:%M")), column_index)
-                    if (download_xml_by_id(extracted_xml_id, extracted_type) == False):
+                    downloaded = download_xml_by_id(extracted_xml_id, extracted_type)
+                    if (downloaded == False):
                         print("\nDownload Failed, Going to the Next One...")
                         continue
-                    time.sleep(1)
                     record_to_add = [extracted_type, extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), " - ", " - ", "not-merged"]
                     add_record(record_to_add)
                     print(f"\nAdded New Record for {extracted_xml_id}")
@@ -212,7 +213,6 @@ def filter_and_store_paths(callback):
                     output = "-- Files are Different --"
                     callback(output)
                     download_xml_by_id(extracted_xml_id, extracted_type)
-                    time.sleep(1)
                     if extracted_type == "artist":
                         artist_xml(extracted_xml_id)
                     if extracted_type == "critic":
@@ -231,7 +231,7 @@ def filter_and_store_paths(callback):
                     output = "-- Files are Same --"
                     callback(output)
                     update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 2)
-        output = f"Merged --> {merge_db()}"
+        output = f"\n\nMerged --> {merge_db()}"
         callback(output)
         
         # # Store filtered paths in a .txt file
