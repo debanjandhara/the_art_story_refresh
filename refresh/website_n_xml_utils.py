@@ -114,6 +114,45 @@ def are_xml_files_equal(xml_id, type):
     # Compare the XML structures
     return similarity_response
 
+from google.cloud import storage
+import os
+
+def delete_folder(bucket_name, folder_name):
+    # Instantiates a client
+    client = storage.Client()
+
+    # Get the bucket
+    bucket = client.bucket(bucket_name)
+
+    # List all blobs in the folder
+    blobs = bucket.list_blobs(prefix=folder_name)
+
+    # Delete each blob in the folder
+    for blob in blobs:
+        blob.delete()
+
+    print(f"Folder '{folder_name}' deleted successfully.")
+
+def upload_files(bucket_name, local_folder_path, cloud_folder_path):
+    # Instantiates a client
+    client = storage.Client()
+
+    # Get the bucket
+    bucket = client.bucket(bucket_name)
+
+    # List all files in the local folder
+    local_files = os.listdir(local_folder_path)
+
+    # Upload each file to the cloud folder
+    for local_file in local_files:
+        local_file_path = os.path.join(local_folder_path, local_file)
+        cloud_file_path = os.path.join(cloud_folder_path, local_file)
+
+        blob = bucket.blob(cloud_file_path)
+        blob.upload_from_filename(local_file_path)
+
+        print(f"File '{local_file}' uploaded to '{cloud_file_path}'.")
+
 
 import requests
 from bs4 import BeautifulSoup
@@ -180,57 +219,58 @@ def filter_and_store_paths(callback):
 
                 # Extracting the first and second portions
                 extracted_type = segments[1]
-                extracted_id = segments[2]
-                extracted_xml_id = convert_to_underscore(extracted_id)
-                output = f"\nType : {extracted_type} ; ID : {extracted_xml_id}"
-                callback(output)
-                # change here
-                if (is_value_in_csv(extracted_xml_id) == False):
-                    print(f"\nIts a New Value. Value : \"{extracted_xml_id}\" not Found in DB")
-                    # update_record(extracted_id, str(datetime.now().strftime("%d %B %Y %H:%M")), column_index)
-                    downloaded = download_xml_by_id(extracted_xml_id, extracted_type)
-                    if (downloaded == False):
-                        print("\nDownload Failed, Going to the Next One...")
-                        continue
-                    record_to_add = [extracted_type, extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), " - ", " - ", "not-merged"]
-                    add_record(record_to_add)
-                    print(f"\nAdded New Record for {extracted_xml_id}")
-                    if extracted_type == "artist":
-                        artist_xml(extracted_xml_id)
-                    if extracted_type == "critic":
-                        critic_xml(extracted_xml_id)
-                    if extracted_type == "definition":
-                        definition_xml(extracted_xml_id)
-                    if extracted_type == "movement":
-                        movement_xml(extracted_xml_id)
-                    if extracted_type == "influencer":
-                        influencer_xml(extracted_xml_id)
-                    update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 3)
-                    print(f"\nUpdated Exisitng Record for {extracted_xml_id}")
-                    vectorise(extracted_xml_id, extracted_type)
-                    update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 4)
-                if (are_xml_files_equal(extracted_xml_id, extracted_type) ==  False):
-                    output = "-- Files are Different --"
+                if extracted_type!="add condition here":
+                    extracted_id = segments[2]
+                    extracted_xml_id = convert_to_underscore(extracted_id)
+                    output = f"\nType : {extracted_type} ; ID : {extracted_xml_id}"
                     callback(output)
-                    download_xml_by_id(extracted_xml_id, extracted_type)
-                    if extracted_type == "artist":
-                        artist_xml(extracted_xml_id)
-                    if extracted_type == "critic":
-                        critic_xml(extracted_xml_id)
-                    if extracted_type == "definition":
-                        definition_xml(extracted_xml_id)
-                    if extracted_type == "movement":
-                        movement_xml(extracted_xml_id)
-                    if extracted_type == "influencer":
-                        influencer_xml(extracted_xml_id)
-                    update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 3)
-                    update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 2)
-                    vectorise(extracted_xml_id, extracted_type)
-                    update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 4)
-                else:
-                    output = "-- Files are Same --"
-                    callback(output)
-                    update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 2)
+                    # change here
+                    if (is_value_in_csv(extracted_xml_id) == False):
+                        print(f"\nIts a New Value. Value : \"{extracted_xml_id}\" not Found in DB")
+                        # update_record(extracted_id, str(datetime.now().strftime("%d %B %Y %H:%M")), column_index)
+                        downloaded = download_xml_by_id(extracted_xml_id, extracted_type)
+                        if (downloaded == False):
+                            print("\nDownload Failed, Going to the Next One...")
+                            continue
+                        record_to_add = [extracted_type, extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), " - ", " - ", "not-merged"]
+                        add_record(record_to_add)
+                        print(f"\nAdded New Record for {extracted_xml_id}")
+                        if extracted_type == "artist":
+                            artist_xml(extracted_xml_id)
+                        if extracted_type == "critic":
+                            critic_xml(extracted_xml_id)
+                        if extracted_type == "definition":
+                            definition_xml(extracted_xml_id)
+                        if extracted_type == "movement":
+                            movement_xml(extracted_xml_id)
+                        if extracted_type == "influencer":
+                            influencer_xml(extracted_xml_id)
+                        update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 3)
+                        print(f"\nUpdated Exisitng Record for {extracted_xml_id}")
+                        vectorise(extracted_xml_id, extracted_type)
+                        update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 4)
+                    if (are_xml_files_equal(extracted_xml_id, extracted_type) ==  False):
+                        output = "-- Files are Different --"
+                        callback(output)
+                        download_xml_by_id(extracted_xml_id, extracted_type)
+                        if extracted_type == "artist":
+                            artist_xml(extracted_xml_id)
+                        if extracted_type == "critic":
+                            critic_xml(extracted_xml_id)
+                        if extracted_type == "definition":
+                            definition_xml(extracted_xml_id)
+                        if extracted_type == "movement":
+                            movement_xml(extracted_xml_id)
+                        if extracted_type == "influencer":
+                            influencer_xml(extracted_xml_id)
+                        update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 3)
+                        update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 2)
+                        vectorise(extracted_xml_id, extracted_type)
+                        update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 4)
+                    else:
+                        output = "-- Files are Same --"
+                        callback(output)
+                        update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 2)
         output = f"\n\nMerged --> {merge_db()}"
         callback(output)
         

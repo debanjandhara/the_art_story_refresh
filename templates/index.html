@@ -18,14 +18,16 @@
 <body>
     <div class="flex flex-col jusitfy-center items-center space-y-5 py-5">
         <div class='text-3xl font-semibold font-sans'>TheArtStory - Refresh Page</div>
-        <button type="button" class="bg-blue-500 hover:bg-blue-700 text-white focus:ring-2 focus:ring-blue-400 font-bold py-2 px-4 rounded"" onclick="triggerFunction()">Trigger Function</button>
+        <button type="button" class="bg-blue-500 hover:bg-blue-700 text-white focus:ring-2 focus:ring-blue-400 font-bold py-2 px-4 rounded" onclick="triggerFunction()">Trigger Function</button>
     </div>
     <div id="responseBox" class=" mx-5 px-6">
     </div>
 
     <script>
         // Connect to the Socket.IO server
-        var socket = io.connect('http://' + document.domain + ':' + location.port);
+        // var socket = io.connect('https://' + document.domain + ':' + location.port);
+        var socket = io.connect('https://35c3-103-175-62-86.ngrok-free.app');
+
 
         // Function to trigger the backend function
         function triggerFunction() {
