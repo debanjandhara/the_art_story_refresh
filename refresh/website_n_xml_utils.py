@@ -14,6 +14,22 @@ from .xml_filtration.format_movement_xml import *
 import time
 from threading import Thread
 
+# -------------------------------------------
+
+# import packages
+from google.cloud import storage
+import os
+from os import listdir
+from os.path import isfile, join
+from dotenv import load_dotenv
+
+# set key credentials file path
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "env/ai-chatbot-412021-e1606cdc6784.json"
+
+bucketName = "tas-website-data"
+
+# -------------------------------------------
+
 def download_xml_by_id(xml_id, type):
     xml_url = f"https://www.theartstory.org/data/content/{type}/{xml_id}.xml"
     output_folder = f"data/raw_xmls/{type}s"
@@ -117,7 +133,8 @@ def are_xml_files_equal(xml_id, type):
 from google.cloud import storage
 import os
 
-def delete_folder(bucket_name, folder_name):
+def delete_folder(bucket_name = bucketName):
+    folder_name = "merged_vector"
     # Instantiates a client
     client = storage.Client()
 
@@ -133,12 +150,18 @@ def delete_folder(bucket_name, folder_name):
 
     print(f"Folder '{folder_name}' deleted successfully.")
 
-def upload_files(bucket_name, local_folder_path, cloud_folder_path):
+def upload_files(bucket_name = bucketName):
+    local_folder_path = "data/merged_vector"
+    cloud_folder_path = "merged_vector_test"
+
     # Instantiates a client
     client = storage.Client()
 
     # Get the bucket
     bucket = client.bucket(bucket_name)
+
+    # Creating a Folder in Bucket
+    blob = bucket.blob(f"{cloud_folder_path}/")
 
     # List all files in the local folder
     local_files = os.listdir(local_folder_path)
@@ -307,3 +330,5 @@ def start_my_function(callback):
     thread = Thread(target=filter_and_store_paths, args=(callback,))
     thread.start()
 
+delete_folder()
+# upload_files()
