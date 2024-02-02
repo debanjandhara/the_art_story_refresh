@@ -78,8 +78,9 @@ Dynamic Card Iframe Link : https://www.theartstory.org/data/content/dynamic_cont
     output_variable += "\n\nQuotes : "
 
     for quotes in root.iter('quotes'):
-        for quote in quotes.findall('q'):
-            output_variable += f'{quote.text}, '
+        if (quotes.find('q') is not None):
+            for quote in quotes.findall('q'):
+                output_variable += f'{quote.text}, '
 
     for article in root.iter('article'):
         synopsys = article.find('synopsys').text

@@ -134,7 +134,7 @@ from google.cloud import storage
 import os
 
 def delete_folder(bucket_name = bucketName):
-    folder_name = "merged_vector"
+    folder_name = "data/merged_vector/"
     # Instantiates a client
     client = storage.Client()
 
@@ -149,10 +149,11 @@ def delete_folder(bucket_name = bucketName):
         blob.delete()
 
     print(f"Folder '{folder_name}' deleted successfully.")
+    return "Successfull !!!"
 
 def upload_files(bucket_name = bucketName):
     local_folder_path = "data/merged_vector"
-    cloud_folder_path = "merged_vector_test"
+    cloud_folder_path = "data/merged_vector"
 
     # Instantiates a client
     client = storage.Client()
@@ -171,10 +172,14 @@ def upload_files(bucket_name = bucketName):
         local_file_path = os.path.join(local_folder_path, local_file)
         cloud_file_path = os.path.join(cloud_folder_path, local_file)
 
+        cloud_file_path = cloud_file_path.replace("\\", "/")
+
         blob = bucket.blob(cloud_file_path)
         blob.upload_from_filename(local_file_path)
 
         print(f"File '{local_file}' uploaded to '{cloud_file_path}'.")
+    
+    return "Successfull !!!"
 
 
 import requests
@@ -235,7 +240,7 @@ def filter_and_store_paths(callback):
             output = ""
             count += 1
             if (count < 10000): # limit and checker
-                output = f"Starting File No. ----------> {count} out of 1000."
+                output = f"Starting File No. ----------> {count} out of 1006."
                 callback(output)
                 # Splitting the string using "/" as the delimiter
                 segments = path.split("/")
@@ -296,6 +301,10 @@ def filter_and_store_paths(callback):
                         update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 2)
         output = f"\n\nMerged --> {merge_db()}"
         callback(output)
+        output = f"\n\nDeleted Existing  --> {delete_folder()}"
+        callback(output)
+        output = f"\n\nUpdated VectorDB --> {upload_files()}"
+        callback(output)
         
         # # Store filtered paths in a .txt file
         # with open(output_file, 'w') as file:
@@ -329,6 +338,3 @@ def start_my_function(callback):
     # thread = Thread(target=my_function, args=(callback,))
     thread = Thread(target=filter_and_store_paths, args=(callback,))
     thread.start()
-
-delete_folder()
-# upload_files()
