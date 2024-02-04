@@ -1,5 +1,6 @@
 # to store xml files
 data/
+database.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
