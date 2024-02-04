@@ -13,7 +13,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 CORS(app)
 
 # Define route for the main page
-@app.route('/')
+@app.route('/dd-refresh/')
 def index():
     return render_template('index.html')
 
