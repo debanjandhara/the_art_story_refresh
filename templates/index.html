@@ -26,8 +26,10 @@
     <script>
         // Connect to the Socket.IO server
         // var socket = io.connect('https://' + document.domain + ':' + location.port);
-        var socket = io.connect('https://dev.aibe.theartstory.org');
-        // var socket = io.connect('https://bfe6-14-194-176-244.ngrok-free.app');
+        // var socket = io.connect('https://dev.aibe.theartstory.org/dd-refresh/');
+        var socket = io.connect('https://f4b3-103-170-183-165.ngrok-free.app/', {
+            'path': 'dd-refresh'
+        });
 
 
         // Function to trigger the backend function
