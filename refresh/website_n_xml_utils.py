@@ -61,6 +61,7 @@ def download_xml_by_id(xml_id, type):
             return False
     except Exception as e:
         print(f"Error: {e}")
+        return False
 
 
 
