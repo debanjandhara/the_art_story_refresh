@@ -16,32 +16,24 @@
     </style>
 </head>
 <body>
-    <div class="flex flex-col justify-center items-center space-y-5 py-5">
+    <div class="flex flex-col jusitfy-center items-center space-y-5 py-5">
         <div class='text-3xl font-semibold font-sans'>TheArtStory - Refresh Page</div>
-        <button id="triggerButton" type="button" class="bg-blue-500 hover:bg-blue-700 text-white focus:ring-2 focus:ring-blue-400 font-bold py-2 px-4 rounded" onclick="triggerFunction()">Trigger Function</button>
+        <button type="button" class="bg-blue-500 hover:bg-blue-700 text-white focus:ring-2 focus:ring-blue-400 font-bold py-2 px-4 rounded" onclick="triggerFunction()">Trigger Function</button>
     </div>
-    <div id="responseBox" class="mx-5 px-6">
+    <div id="responseBox" class=" mx-5 px-6">
     </div>
 
     <script>
-        var socket = io.connect('https://dev.aibe.theartstory.org/', {
+        // Connect to the Socket.IO server
+        // var socket = io.connect('https://' + document.domain + ':' + location.port);
+        // var socket = io.connect('https://dev.aibe.theartstory.org/dd-refresh/');
+        var socket = io.connect('https://71cd-14-194-176-244.ngrok-free.app/', {
             'path': '/dd-refresh/socket.io'
         });
 
+
         // Function to trigger the backend function
         function triggerFunction() {
-            var button = document.getElementById('triggerButton');
-
-            // Disable the button in grey color
-            button.disabled = true;
-            button.style.backgroundColor = '#a0aec0'; // Grey color
-
-            // Enable the button after 60 seconds
-            setTimeout(function() {
-                button.disabled = false;
-                button.style.backgroundColor = 'bg-blue-500'; // Restore original color
-            }, 60000);
-
             socket.emit('trigger_function');
         }
 
@@ -55,6 +47,7 @@
             
             // Set the content of the new paragraph
             newParagraph.innerHTML = output;
+            // newParagraph.classList.add("w-full text-lg py-2 px-6 my-3");
             newParagraph.classList.add('w-full', 'text-lg', 'text-center', 'py-1', 'px-6', 'my-1');
 
             // Append the new paragraph to the response box
