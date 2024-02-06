@@ -15,7 +15,7 @@ CORS(app)
 # CORS(app, resources={r"/dd-refresh/socket.io/*": {"origins": "*"}})
 
 # Define route for the main page
-@app.route('/dd-refresh/')
+@app.route('/')
 def index():
     return render_template('index.html')
 
