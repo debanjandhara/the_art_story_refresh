@@ -7,11 +7,12 @@ import time
 
 # Create Flask app and SocketIO instance
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*", path='/dd-refresh/socket.io')
+socketio = SocketIO(app, cors_allowed_origins="*")
+# socketio = SocketIO(app, cors_allowed_origins="*", path='/dd-refresh/socket.io')
 
 # Enable CORS for all routes
-# CORS(app)
-CORS(app, resources={r"/dd-refresh/socket.io/*": {"origins": "*"}})
+CORS(app)
+# CORS(app, resources={r"/dd-refresh/socket.io/*": {"origins": "*"}})
 
 # Define route for the main page
 @app.route('/dd-refresh/')
