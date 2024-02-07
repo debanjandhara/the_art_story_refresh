@@ -105,7 +105,7 @@ def search_docs(prompt, question, state = []):
     # return formatted_response(docs, question, response, state)
     return response
 
-def merge_db():
+def merge_db(callback):
     vector_base_folder = f"data/vectors"
     final_folder = f"data/merged_vector"
     if os.path.exists(final_folder):
@@ -139,6 +139,8 @@ def merge_db():
         VectorStore1 = FAISS.load_local(final_folder, embeddings=embeddings)
         VectorStore2 = FAISS.load_local(f"{vector_base_folder}/{folders[i]}", embeddings=embeddings)
         print(f"\n\n{vector_base_folder}/{folders[i]}")
+        output = f"\nMerging Folder {i} out of {len(folders)} : {folders[i]}"
+        callback(output)
         VectorStore2.merge_from(VectorStore1)
         VectorStore2.save_local(final_folder)
 

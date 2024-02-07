@@ -10,6 +10,7 @@ from .xml_filtration.format_critic_xml import *
 from .xml_filtration.format_definition_xml import *
 from .xml_filtration.format_influencer_xml import *
 from .xml_filtration.format_movement_xml import *
+from .test import *
 
 import time
 from threading import Thread
@@ -30,7 +31,7 @@ bucketName = "tas-website-data"
 
 # -------------------------------------------
 
-def download_xml_by_id(xml_id, type):
+def download_xml_by_id(xml_id, type, callback):
     xml_url = f"https://www.theartstory.org/data/content/{type}/{xml_id}.xml"
     output_folder = f"data/raw_xmls/{type}s"
     output_file = f"data/raw_xmls/{type}s/{xml_id}.xml"
@@ -58,6 +59,8 @@ def download_xml_by_id(xml_id, type):
             return True
         else:
             print(f"Error: Unable to download XML. Status Code: {response.status_code}")
+            output = f"Error: Unable to download XML. Status Code: {response.status_code}"
+            callback(output)
             return False
     except Exception as e:
         print(f"Error: {e}")
@@ -236,13 +239,12 @@ def filter_and_store_paths(callback):
             path = urlparse(full_url).path
             if any(filter_path in path for filter_path in filter_paths):
                 paths.add(path)
+        total_paths = len(paths)
 
         for path in paths:
             output = ""
             count += 1
             if (count < 10000): # limit and checker
-                output = f"Starting File No. ----------> {count} out of 1006."
-                callback(output)
                 # Splitting the string using "/" as the delimiter
                 segments = path.split("/")
 
@@ -251,13 +253,13 @@ def filter_and_store_paths(callback):
                 if extracted_type!="add condition here":
                     extracted_id = segments[2]
                     extracted_xml_id = convert_to_underscore(extracted_id)
-                    output = f"\nType : {extracted_type} ; ID : {extracted_xml_id}"
+                    output = f"=== Checking File {count} out of {total_paths} : {extracted_type} - {extracted_xml_id}"
                     callback(output)
                     # change here
                     if (is_value_in_csv(extracted_xml_id) == False):
                         print(f"\nIts a New Value. Value : \"{extracted_xml_id}\" not Found in DB")
                         # update_record(extracted_id, str(datetime.now().strftime("%d %B %Y %H:%M")), column_index)
-                        downloaded = download_xml_by_id(extracted_xml_id, extracted_type)
+                        downloaded = download_xml_by_id(extracted_xml_id, extracted_type, callback)
                         if (downloaded == False):
                             print("\nDownload Failed, Going to the Next One...")
                             continue
@@ -281,7 +283,13 @@ def filter_and_store_paths(callback):
                     if (are_xml_files_equal(extracted_xml_id, extracted_type) ==  False):
                         output = "-- Files are Different --"
                         callback(output)
-                        download_xml_by_id(extracted_xml_id, extracted_type)
+                        output = "-- Downloaded --"
+                        callback(output)
+                        output = "-- Filtered --"
+                        callback(output)
+                        output = "-- Vectorised --"
+                        callback(output)
+                        download_xml_by_id(extracted_xml_id, extracted_type, callback)
                         if extracted_type == "artist":
                             artist_xml(extracted_xml_id)
                         if extracted_type == "critic":
@@ -297,10 +305,10 @@ def filter_and_store_paths(callback):
                         vectorise(extracted_xml_id, extracted_type)
                         update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 4)
                     else:
-                        output = "-- Files are Same --"
+                        output = "-- Files are Same -- Skipping..."
                         callback(output)
                         update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 2)
-        output = f"\n\nMerged --> {merge_db()}"
+        output = f"\n\nMerged --> {merge_db(callback)}"
         callback(output)
         output = f"\n\nDeleted Existing  --> {delete_folder()}"
         callback(output)
@@ -315,9 +323,19 @@ def filter_and_store_paths(callback):
         print(f"Filtered paths extracted and stored in database.csv and Required Folder")
         return "Success"
 
-    except requests.exceptions.RequestException as e:
+    # except requests.exceptions.RequestException as e:
+    except Exception as e:
         print(f"Error fetching the page: {e}")
+        output = f"Error : {e}"
+        callback(output)
         return "Failure"
+
+
+def start_my_function(callback):
+    # thread = Thread(target=my_function, args=(callback,))
+    thread = Thread(target=filter_and_store_paths, args=(callback,))
+    thread.start()
+
 # filter_and_store_paths()
 
 
@@ -334,8 +352,3 @@ def filter_and_store_paths(callback):
 #         time.sleep(0.7)
 #         output = f'''count -- > {i} '''
 #         callback(output)
-
-def start_my_function(callback):
-    # thread = Thread(target=my_function, args=(callback,))
-    thread = Thread(target=filter_and_store_paths, args=(callback,))
-    thread.start()

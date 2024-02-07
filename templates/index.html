@@ -22,9 +22,13 @@
     </div>
     <div id="responseBox" class="mx-5 px-6">
     </div>
-
+    <div class="flex flex-col justify-center items-center space-y-5 py-5">
+        <button id="scrollBtn" type="button" class="bg-blue-500 hover:bg-blue-700 text-white focus:ring-2 focus:ring-blue-400 font-bold py-2 px-4 rounded"  onclick="scrollToBottom()">Scroll to Bottom</button>
+    </div>
+    
     <script>
         var socket = io.connect('https://dev.refresh.theartstory.org/');
+        // var socket = io.connect('https://a812-14-194-176-244.ngrok-free.app');
 
         // Function to trigger the backend function
         function triggerFunction() {
@@ -53,7 +57,14 @@
             
             // Set the content of the new paragraph
             newParagraph.innerHTML = output;
-            newParagraph.classList.add('w-full', 'text-lg', 'text-center', 'py-1', 'px-6', 'my-1');
+            newParagraph.classList.add(
+                'w-full', 
+                'text-lg', 
+                // 'text-center', 
+                'py-1', 
+                'px-6', 
+                'my-1'
+            );
 
             // Append the new paragraph to the response box
             responseBox.appendChild(newParagraph);
@@ -69,6 +80,11 @@
             // Check if the user is scrolling down
             scrollingDown = responseBox.scrollTop + responseBox.clientHeight >= responseBox.scrollHeight;
         });
+
+        function scrollToBottom() {
+            var responseBox = document.getElementById('responseBox');
+            responseBox.scrollTop = responseBox.scrollHeight;
+        }
     </script>
 </body>
 </html>
