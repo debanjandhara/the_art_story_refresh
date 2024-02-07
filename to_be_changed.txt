@@ -1,0 +1,4 @@
+1) Index.html --> Socket link
+2) app.py --> socket ssl path
+3) merge vector --> folder count
+4) website filter --> critic only

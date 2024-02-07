@@ -250,7 +250,8 @@ def filter_and_store_paths(callback):
 
                 # Extracting the first and second portions
                 extracted_type = segments[1]
-                if extracted_type!="add condition here":
+                # if extracted_type!="add condition here":
+                if extracted_type=="critic":
                     extracted_id = segments[2]
                     extracted_xml_id = convert_to_underscore(extracted_id)
                     output = f"=== Checking File {count} out of {total_paths} : {extracted_type} - {extracted_xml_id}"
