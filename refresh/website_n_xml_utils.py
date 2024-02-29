@@ -250,8 +250,8 @@ def filter_and_store_paths(callback):
 
                 # Extracting the first and second portions
                 extracted_type = segments[1]
-                # if extracted_type!="add condition here":
-                if extracted_type=="critic":
+                if extracted_type!="add condition here":
+                # if extracted_type=="critic":
                     extracted_id = segments[2]
                     extracted_xml_id = convert_to_underscore(extracted_id)
                     output = f"=== Checking File {count} out of {total_paths} : {extracted_type} - {extracted_xml_id}"
@@ -311,10 +311,12 @@ def filter_and_store_paths(callback):
                         update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 2)
         output = f"\n\nMerged --> {merge_db(callback)}"
         callback(output)
-        output = f"\n\nDeleted Existing  --> {delete_folder()}"
+        output = f"Completed !!!"
         callback(output)
-        output = f"\n\nUpdated VectorDB --> {upload_files()}"
-        callback(output)
+        # output = f"\n\nDeleted Existing  --> {delete_folder()}"
+        # callback(output)
+        # output = f"\n\nUpdated VectorDB --> {upload_files()}"
+        # callback(output)
         
         # # Store filtered paths in a .txt file
         # with open(output_file, 'w') as file:
@@ -324,10 +326,14 @@ def filter_and_store_paths(callback):
         print(f"Filtered paths extracted and stored in database.csv and Required Folder")
         return "Success"
 
-    # except requests.exceptions.RequestException as e:
-    except Exception as e:
+    except requests.exceptions.RequestException as e:
         print(f"Error fetching the page: {e}")
-        output = f"Error : {e}"
+        output = f"Error fetching the page: {e}"
+        callback(output)
+        return "Failure"
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        output = f"Unexpected error: {e}"
         callback(output)
         return "Failure"
 
