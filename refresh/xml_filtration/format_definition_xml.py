@@ -118,3 +118,4 @@ Dynamic Card Iframe Link : https://www.theartstory.org/data/content/dynamic_cont
         file.write(output_variable)
 
     print(f"Output has been written to {output_file}")
+    return name.lower()
