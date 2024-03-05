@@ -251,53 +251,54 @@ def filter_and_store_paths(callback):
             for path in paths:
                 output = ""
                 count += 1
-                extracted_name =  ""
                 if (count < 10000): # limit and checker
                     # Splitting the string using "/" as the delimiter
                     segments = path.split("/")
 
                     # Extracting the first and second portions
                     extracted_type = segments[1]
-                    try:
-                        if extracted_type!="add condition here":
-                        # if extracted_type=="critic":
-                            extracted_id = segments[2]
-                            extracted_xml_id = convert_to_underscore(extracted_id)
-                            output = f"=== Checking File {count} out of {total_paths} : {extracted_type} - {extracted_xml_id}"
-                            callback(output)
-                            # change here
-                            if (is_value_in_csv(extracted_xml_id) == False):
-                                print(f"\nIts a New Value. Value : \"{extracted_xml_id}\" not Found in DB")
-                                # update_record(extracted_id, str(datetime.now().strftime("%d %B %Y %H:%M")), column_index)
-                                downloaded = download_xml_by_id(extracted_xml_id, extracted_type, callback)
-                                if (downloaded == False):
-                                    print("\nDownload Failed, Going to the Next One...")
-                                    continue
-                                record_to_add = [extracted_type, extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), " - ", " - ", "not-merged"]
-                                add_record(record_to_add)
-                                print(f"\nAdded New Record for {extracted_xml_id}")
-                                if extracted_type == "artist":
-                                    extracted_name = artist_xml(extracted_xml_id)
-                                if extracted_type == "critic":
-                                    extracted_name = critic_xml(extracted_xml_id)
-                                if extracted_type == "definition":
-                                    extracted_name = definition_xml(extracted_xml_id)
-                                if extracted_type == "movement":
-                                    extracted_name = movement_xml(extracted_xml_id)
-                                if extracted_type == "influencer":
-                                    extracted_name = influencer_xml(extracted_xml_id)
-                                update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 3)
-                                print(f"\nUpdated Exisitng Record for {extracted_xml_id}")
-                                vectorise(extracted_xml_id, extracted_type)
-                                update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 4)
-                                update_record(extracted_xml_id, extracted_name, 5)
-                    except Exception as e:
-                        print(f"Part - 2.1 : Unexpected error: {e}")
-                        output = f"Part - 2.1 : Unexpected error: {e}"
+                    if extracted_type!="add condition here":
+                    # if extracted_type=="critic":
+                        extracted_id = segments[2]
+                        print(extracted_id)
+                        extracted_xml_id = convert_to_underscore(extracted_id)
+                        output = f"=== Checking File {count} out of {total_paths} : {extracted_type} - {extracted_xml_id}"
                         callback(output)
-                        return "Failure"
-                    
-                    try:
+                        # change here
+                        if (is_value_in_csv(extracted_xml_id) == False):
+                            print(f"\nIts a New Value. Value : \"{extracted_xml_id}\" not Found in DB")
+                            # update_record(extracted_id, str(datetime.now().strftime("%d %B %Y %H:%M")), column_index)
+                            downloaded = download_xml_by_id(extracted_xml_id, extracted_type, callback)
+                            if (downloaded == False):
+                                print("\nDownload Failed, Going to the Next One...")
+                                continue
+                            record_to_add = [extracted_type, extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), " - ", " - ", "not-merged"]
+                            add_record(record_to_add)
+                            print(f"\nAdded New Record for {extracted_xml_id}")
+                            if extracted_type == "artist":
+                                extracted_name = artist_xml(extracted_xml_id)
+                            if extracted_type == "critic":
+                                extracted_name = critic_xml(extracted_xml_id)
+                            if extracted_type == "definition":
+                                extracted_name = definition_xml(extracted_xml_id)
+                            if extracted_type == "movement":
+                                extracted_name = movement_xml(extracted_xml_id)
+                            if extracted_type == "influencer":
+                                extracted_name = influencer_xml(extracted_xml_id)
+                            update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 3)
+                            print(f"\nUpdated Exisitng Record for {extracted_xml_id}")
+                            vectorise(extracted_xml_id, extracted_type)
+                            update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 4)
+                            update_record(extracted_xml_id, extracted_name, 5)
+                            output = "-- New File Detected ..."
+                            callback(output)
+                            output = "-- Downloaded --"
+                            callback(output)
+                            output = "-- Filtered --"
+                            callback(output)
+                            output = "-- Vectorised --"
+                            callback(output)
+
                         if (are_xml_files_equal(extracted_xml_id, extracted_type) ==  False):
                             output = "-- Files are Different --"
                             callback(output)
@@ -327,11 +328,6 @@ def filter_and_store_paths(callback):
                             output = "-- Files are Same -- Skipping..."
                             callback(output)
                             update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 2)
-                    except Exception as e:
-                        print(f"Part - 2.2 : Unexpected error: {e}")
-                        output = f"Part - 2.2 : Unexpected error: {e}"
-                        callback(output)
-                        return "Failure"
             output = f"\n\nMerged --> {merge_db(callback)}"
             callback(output)
             output = f"Completed !!!"
@@ -341,10 +337,10 @@ def filter_and_store_paths(callback):
             output = f"Part - 2 : Unexpected error: {e}"
             callback(output)
             return "Failure"
-        output = f"\n\nDeleted Existing  --> {delete_folder()}"
-        callback(output)
-        output = f"\n\nUpdated VectorDB --> {upload_files()}"
-        callback(output)
+        # output = f"\n\nDeleted Existing  --> {delete_folder()}"
+        # callback(output)
+        # output = f"\n\nUpdated VectorDB --> {upload_files()}"
+        # callback(output)
 
 
         print(f"Filtered paths extracted and stored in database.csv and Required Folder")

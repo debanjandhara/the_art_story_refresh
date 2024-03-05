@@ -5,6 +5,34 @@ from flask_cors import CORS, cross_origin
 from refresh.website_n_xml_utils import start_my_function
 import time
 
+import os
+
+# Define the file path
+file_path = "database.csv"
+
+# Check if the file already exists
+if os.path.exists(file_path):
+    # If it exists, delete the file
+    os.remove(file_path)
+
+# Create a new file and write the header
+with open(file_path, 'w') as file:
+    file.write("Type,ID,last_checked,last_modified,last_vectorised,name\n")
+
+print("File created successfully:", file_path)
+
+import shutil
+
+# Specify the path of the folder to be deleted
+folder_path = "data"
+
+# Delete the folder and its contents
+if os.path.exists(folder_path):
+    shutil.rmtree(folder_path)
+
+print("Folder deleted successfully:", folder_path)
+
+
 # Create Flask app and SocketIO instance
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
