@@ -21,16 +21,16 @@ with open(file_path, 'w') as file:
 
 print("File created successfully:", file_path)
 
-import shutil
+# import shutil
 
-# Specify the path of the folder to be deleted
-folder_path = "data"
+# # Specify the path of the folder to be deleted
+# folder_path = "data"
 
-# Delete the folder and its contents
-if os.path.exists(folder_path):
-    shutil.rmtree(folder_path)
+# # Delete the folder and its contents
+# if os.path.exists(folder_path):
+#     shutil.rmtree(folder_path)
 
-print("Folder deleted successfully:", folder_path)
+# print("Folder deleted successfully:", folder_path)
 
 
 # Create Flask app and SocketIO instance
