@@ -136,8 +136,8 @@ def merge_db(callback):
     VectorStore2 = FAISS.load_local(f"{vector_base_folder}/{folders[1]}", embeddings=embeddings)
     VectorStore2.merge_from(VectorStore1)
     VectorStore2.save_local(final_folder)
-    for i in range(2,3):
-    # for i in range(2,len(folders)):
+    # for i in range(2,3):
+    for i in range(2,len(folders)):
         VectorStore1 = FAISS.load_local(final_folder, embeddings=embeddings)
         VectorStore2 = FAISS.load_local(f"{vector_base_folder}/{folders[i]}", embeddings=embeddings)
         print(f"\n\n{vector_base_folder}/{folders[i]}")

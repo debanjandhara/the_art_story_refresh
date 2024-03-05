@@ -7,19 +7,19 @@ import time
 
 import os
 
-# Define the file path
-file_path = "database.csv"
+# # Define the file path
+# file_path = "database.csv"
 
 # # Check if the file already exists
 # if os.path.exists(file_path):
 #     # If it exists, delete the file
 #     os.remove(file_path)
 
-# Create a new file and write the header
-with open(file_path, 'w') as file:
-    file.write("Type,ID,last_checked,last_modified,last_vectorised,name\n")
+# # Create a new file and write the header
+# with open(file_path, 'w') as file:
+#     file.write("Type,ID,last_checked,last_modified,last_vectorised,name\n")
 
-print("File created successfully:", file_path)
+# print("File created successfully:", file_path)
 
 # import shutil
 
