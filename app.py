@@ -10,10 +10,10 @@ import os
 # Define the file path
 file_path = "database.csv"
 
-# Check if the file already exists
-if os.path.exists(file_path):
-    # If it exists, delete the file
-    os.remove(file_path)
+# # Check if the file already exists
+# if os.path.exists(file_path):
+#     # If it exists, delete the file
+#     os.remove(file_path)
 
 # Create a new file and write the header
 with open(file_path, 'w') as file:
