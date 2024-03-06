@@ -47,8 +47,10 @@ def update_record(record_id, new_value, column_index):
             record[column_index] = new_value
             break
 
-    with open(csv_file, mode='w', newline='') as file:
+    with open(csv_file, mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
+        # print("---writer enabled---")
+        # print(records)
         writer.writerows(records)
 
 def is_value_in_csv(target_value):

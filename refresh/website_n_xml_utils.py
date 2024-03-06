@@ -77,6 +77,7 @@ import json
 def convert_to_underscore(input_string):
     # Using regex to replace hyphens with underscores
     result_string = re.sub(r'[-]', '_', input_string)
+    print(result_string.encode('utf-8'))
     return result_string
 
 
@@ -257,11 +258,14 @@ def filter_and_store_paths(callback):
 
                     # Extracting the first and second portions
                     extracted_type = segments[1]
-                    if extracted_type!="add condition here":
+                    extracted_id = segments[2]
+                    if extracted_id=="sosaku-hanga-creative-prints":
+                    # if extracted_type!="add condition here":
                     # if extracted_type=="critic":
-                        extracted_id = segments[2]
+                        # extracted_id = segments[2]
                         print(extracted_id)
                         extracted_xml_id = convert_to_underscore(extracted_id)
+                        print(extracted_xml_id)
                         output = f"=== Checking File {count} out of {total_paths} : {extracted_type} - {extracted_xml_id}"
                         callback(output)
                         # change here
@@ -272,24 +276,38 @@ def filter_and_store_paths(callback):
                             if (downloaded == False):
                                 print("\nDownload Failed, Going to the Next One...")
                                 continue
-                            record_to_add = [extracted_type, extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), " - ", " - ", "not-merged"]
+                            record_to_add = [extracted_type, extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), " - ", " - ", "here_should_be_the_name"]
                             add_record(record_to_add)
                             print(f"\nAdded New Record for {extracted_xml_id}")
-                            if extracted_type == "artist":
-                                extracted_name = artist_xml(extracted_xml_id)
-                            if extracted_type == "critic":
-                                extracted_name = critic_xml(extracted_xml_id)
-                            if extracted_type == "definition":
-                                extracted_name = definition_xml(extracted_xml_id)
-                            if extracted_type == "movement":
-                                extracted_name = movement_xml(extracted_xml_id)
-                            if extracted_type == "influencer":
-                                extracted_name = influencer_xml(extracted_xml_id)
+                            try:
+                                if extracted_type == "artist":
+                                    extracted_name = artist_xml(extracted_xml_id)
+                                if extracted_type == "critic":
+                                    extracted_name = critic_xml(extracted_xml_id)
+                                if extracted_type == "definition":
+                                    extracted_name = definition_xml(extracted_xml_id)
+                                if extracted_type == "movement":
+                                    extracted_name = movement_xml(extracted_xml_id)
+                                if extracted_type == "influencer":
+                                    extracted_name = influencer_xml(extracted_xml_id)
+                                print(extracted_name)
+                            except Exception as e:
+                                print(f"Part - 2.1 : Unexpected error: {e}")
+                                output = f"Part - 2.1 : Unexpected error: {e}"
+                                callback(output)
+                                return "Failure"
                             update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 3)
                             print(f"\nUpdated Exisitng Record for {extracted_xml_id}")
-                            vectorise(extracted_xml_id, extracted_type)
+                            # vectorise(extracted_xml_id, extracted_type)
                             update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 4)
-                            update_record(extracted_xml_id, extracted_name, 5)
+                            try:
+                                print(extracted_xml_id)
+                                update_record(extracted_xml_id, extracted_name, 5)
+                            except Exception as e:
+                                print(f"Part - 2.2 : Unexpected error: {e}")
+                                output = f"Part - 2.2 : Unexpected error: {e}"
+                                callback(output)
+                                return "Failure"
                             output = "-- New File Detected ..."
                             callback(output)
                             output = "-- Downloaded --"
@@ -309,25 +327,43 @@ def filter_and_store_paths(callback):
                             output = "-- Vectorised --"
                             callback(output)
                             download_xml_by_id(extracted_xml_id, extracted_type, callback)
-                            if extracted_type == "artist":
-                                extracted_name = artist_xml(extracted_xml_id)
-                            if extracted_type == "critic":
-                                extracted_name = critic_xml(extracted_xml_id)
-                            if extracted_type == "definition":
-                                extracted_name = definition_xml(extracted_xml_id)
-                            if extracted_type == "movement":
-                                extracted_name = movement_xml(extracted_xml_id)
-                            if extracted_type == "influencer":
-                                extracted_name = influencer_xml(extracted_xml_id)
+                            try:
+                                if extracted_type == "artist":
+                                    extracted_name = artist_xml(extracted_xml_id)
+                                if extracted_type == "critic":
+                                    extracted_name = critic_xml(extracted_xml_id)
+                                if extracted_type == "definition":
+                                    extracted_name = definition_xml(extracted_xml_id)
+                                if extracted_type == "movement":
+                                    extracted_name = movement_xml(extracted_xml_id)
+                                if extracted_type == "influencer":
+                                    extracted_name = influencer_xml(extracted_xml_id)
+                            except Exception as e:
+                                print(f"Part - 2.1 : Unexpected error: {e}")
+                                output = f"Part - 2.1 : Unexpected error: {e}"
+                                callback(output)
+                                return "Failure"
                             update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 3)
-                            update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 2)
-                            vectorise(extracted_xml_id, extracted_type)
+                            try:
+                                update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 2)
+                            except Exception as e:
+                                print(f"Part - 2.2 : Unexpected error: {e}")
+                                output = f"Part - 2.2 : Unexpected error: {e}"
+                                callback(output)
+                                return "Failure"
+                            # vectorise(extracted_xml_id, extracted_type)
                             update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 4)
                             update_record(extracted_xml_id, extracted_name, 5)
                         else:
                             output = "-- Files are Same -- Skipping..."
                             callback(output)
-                            update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 2)
+                            try:
+                                update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 2)
+                            except Exception as e:
+                                print(f"Part - 2.3 : Unexpected error: {e}")
+                                output = f"Part - 2.3 : Unexpected error: {e}"
+                                callback(output)
+                                return "Failure"
             output = f"\n\nMerged --> {merge_db(callback)}"
             callback(output)
             output = f"Completed !!!"
