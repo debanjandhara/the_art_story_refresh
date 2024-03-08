@@ -13,14 +13,7 @@ def add_record(record):
 # Function to read all records from the CSV file
 def read_records():
     csv_file = 'database.csv'
-    with open(csv_file, mode='r') as file:
-        reader = csv.reader(file)
-        for row in reader:
-            print(row)
-
-def read_records_2():
-    csv_file = 'database.csv'
-    with open(csv_file, mode='r') as file:
+    with open(csv_file, mode='r', encoding='utf-8') as file:
         reader = csv.reader(file)
         records = list(reader)
     return records
@@ -40,7 +33,7 @@ def read_records_2():
 
 def update_record(record_id, new_value, column_index):
     csv_file = 'database.csv'
-    records = read_records_2()
+    records = read_records()
 
     for record in records:
         if record[1] == record_id:  # Assuming ID is in the second column
@@ -55,7 +48,7 @@ def update_record(record_id, new_value, column_index):
 
 def is_value_in_csv(target_value):
     csv_file = 'database.csv'
-    with open(csv_file, 'r') as file:
+    with open(csv_file, 'r', encoding='utf-8') as file:
         csv_reader = csv.reader(file)
         for row in csv_reader:
             if target_value in row:
@@ -72,3 +65,5 @@ def is_value_in_csv(target_value):
 
 # # # Update a single value in the record with the specified ID
 # update_record(csv_file_path, record_id_to_update, new_last_modified_value, column_index_to_update)
+
+# update_record("sosaku_hanga_creative_prints", "sōsaku-hanga creative prints", 5)

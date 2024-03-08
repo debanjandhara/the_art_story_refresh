@@ -37,7 +37,13 @@ def download_xml_by_id(xml_id, type, callback):
     output_file = f"data/raw_xmls/{type}s/{xml_id}.xml"
     try:
         # Make a GET request to the XML URL
-        response = requests.get(xml_url)
+        try:
+            response = requests.get(xml_url, timeout=5)
+        except Exception as e:
+            print(f"Download Function Error : {e}")
+            output = f"Download Function Error : {e}"
+            callback(output)
+            return False
 
         # Check if the request was successful (status code 200)
         if response.status_code == 200:
@@ -81,40 +87,11 @@ def convert_to_underscore(input_string):
     return result_string
 
 
-
-def convert_link(input_link):
-    # Extract type and id using regex
-    match = re.match(r'https://www.theartstory.org/(?P<type>[a-zA-Z]+)/(?P<id>[a-zA-Z-]+)/', input_link)
-    
-    if match:
-        type = match.group('type')
-        id = match.group('id')
-        
-        # Convert id using regex
-        id = re.sub(r'-', r'_', id)
-        
-        # Create the new link
-        new_link = f'https://www.theartstory.org/data/content/{type}/{id}.xml'
-        
-        # Store the information in JSON format
-        result_json = {
-            "website_link": input_link,
-            "type": type,
-            "id": id,
-            "xml_link": new_link
-        }
-        
-        return json.dumps(result_json, indent=2)
-    else:
-        return json.dumps({"error": "Invalid input link format"}, indent=2)
-
-
-import xml.etree.ElementTree as ET
-
 def are_xml_files_equal(xml_id, type):
 
-    online_url = f"https://www.theartstory.org/data/content/{type}/{xml_id}.xml"
+    import xml.etree.ElementTree as ET
 
+    online_url = f"https://www.theartstory.org/data/content/{type}/{xml_id}.xml"
     local_path = f"data/raw_xmls/{type}s/{xml_id}.xml"
     
     # Fetch online XML
@@ -135,10 +112,11 @@ def are_xml_files_equal(xml_id, type):
     # Compare the XML structures
     return similarity_response
 
-from google.cloud import storage
-import os
-
 def delete_folder(bucket_name = bucketName):
+
+    import os
+    from google.cloud import storage
+
     folder_name = "data/merged_vector/"
     # Instantiates a client
     client = storage.Client()
@@ -157,6 +135,10 @@ def delete_folder(bucket_name = bucketName):
     return "Successfull !!!"
 
 def upload_files(bucket_name = bucketName):
+
+    import os
+    from google.cloud import storage
+
     local_folder_path = "data/merged_vector"
     cloud_folder_path = "data/merged_vector"
 
@@ -186,12 +168,14 @@ def upload_files(bucket_name = bucketName):
     
     return "Successfull !!!"
 
-
-import requests
-from bs4 import BeautifulSoup
-from urllib.parse import urlparse, urljoin
-
 def filter_and_store_paths(callback):
+
+    import requests
+    from bs4 import BeautifulSoup
+    from urllib.parse import urlparse, urljoin
+
+    # Creating my data folders if they don't exist 
+
     if not os.path.exists("data/"):
         os.makedirs("data/")
     if not os.path.exists("data/filtered_txts"):
@@ -218,181 +202,157 @@ def filter_and_store_paths(callback):
         os.makedirs("data/raw_xmls/influencers")
     if not os.path.exists("data/raw_xmls/movements"):
         os.makedirs("data/raw_xmls/movements")
+
+    # Define the URL to scrape
     url = "https://www.theartstory.org/sitemap.htm"
-    # output_file="paths2.txt"
+
+    # Inintializing the count for the files
     count = 0
+
     try:
-        try:
-            # Fetch the HTML content of the page
-            response = requests.get(url)
-            response.raise_for_status()
+        # Fetch the HTML content of the page
+        response = requests.get(url)
+        response.raise_for_status()
 
-            # Parse the HTML content
-            soup = BeautifulSoup(response.content, 'html.parser')
+        # Parse the HTML content
+        soup = BeautifulSoup(response.content, 'html.parser')
 
-            # Define paths to filter
-            filter_paths = ["/artist/", "/critic/", "/definition/", "/influencer/", "/movement/"]
+        # Define paths to filter
+        filter_paths = ["/artist/", "/critic/", "/definition/", "/influencer/", "/movement/"]
 
-            # Extract and filter paths from the links
-            paths = set()
-            for link in soup.find_all('a', href=True):
-                href = link['href']
-                full_url = urljoin(url, href)
-                path = urlparse(full_url).path
-                if any(filter_path in path for filter_path in filter_paths):
-                    paths.add(path)
-            total_paths = len(paths)
-        except Exception as e:
-            print(f"Part - 1 : Unexpected error: {e}")
-            output = f"Part - 1 : Unexpected error: {e}"
-            callback(output)
-            return "Failure"
-
-        try:
-            for path in paths:
-                output = ""
-                count += 1
-                if (count < 10000): # limit and checker
-                    # Splitting the string using "/" as the delimiter
-                    segments = path.split("/")
-
-                    # Extracting the first and second portions
-                    extracted_type = segments[1]
-                    extracted_id = segments[2]
-                    if extracted_id=="sosaku-hanga-creative-prints":
-                    # if extracted_type!="add condition here":
-                    # if extracted_type=="critic":
-                        # extracted_id = segments[2]
-                        print(extracted_id)
-                        extracted_xml_id = convert_to_underscore(extracted_id)
-                        print(extracted_xml_id)
-                        output = f"=== Checking File {count} out of {total_paths} : {extracted_type} - {extracted_xml_id}"
-                        callback(output)
-                        # change here
-                        if (is_value_in_csv(extracted_xml_id) == False):
-                            print(f"\nIts a New Value. Value : \"{extracted_xml_id}\" not Found in DB")
-                            # update_record(extracted_id, str(datetime.now().strftime("%d %B %Y %H:%M")), column_index)
-                            downloaded = download_xml_by_id(extracted_xml_id, extracted_type, callback)
-                            if (downloaded == False):
-                                print("\nDownload Failed, Going to the Next One...")
-                                continue
-                            record_to_add = [extracted_type, extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), " - ", " - ", "here_should_be_the_name"]
-                            add_record(record_to_add)
-                            print(f"\nAdded New Record for {extracted_xml_id}")
-                            try:
-                                if extracted_type == "artist":
-                                    extracted_name = artist_xml(extracted_xml_id)
-                                if extracted_type == "critic":
-                                    extracted_name = critic_xml(extracted_xml_id)
-                                if extracted_type == "definition":
-                                    extracted_name = definition_xml(extracted_xml_id)
-                                if extracted_type == "movement":
-                                    extracted_name = movement_xml(extracted_xml_id)
-                                if extracted_type == "influencer":
-                                    extracted_name = influencer_xml(extracted_xml_id)
-                                print(extracted_name)
-                            except Exception as e:
-                                print(f"Part - 2.1 : Unexpected error: {e}")
-                                output = f"Part - 2.1 : Unexpected error: {e}"
-                                callback(output)
-                                return "Failure"
-                            update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 3)
-                            print(f"\nUpdated Exisitng Record for {extracted_xml_id}")
-                            # vectorise(extracted_xml_id, extracted_type)
-                            update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 4)
-                            try:
-                                print(extracted_xml_id)
-                                update_record(extracted_xml_id, extracted_name, 5)
-                            except Exception as e:
-                                print(f"Part - 2.2 : Unexpected error: {e}")
-                                output = f"Part - 2.2 : Unexpected error: {e}"
-                                callback(output)
-                                return "Failure"
-                            output = "-- New File Detected ..."
-                            callback(output)
-                            output = "-- Downloaded --"
-                            callback(output)
-                            output = "-- Filtered --"
-                            callback(output)
-                            output = "-- Vectorised --"
-                            callback(output)
-
-                        if (are_xml_files_equal(extracted_xml_id, extracted_type) ==  False):
-                            output = "-- Files are Different --"
-                            callback(output)
-                            output = "-- Downloaded --"
-                            callback(output)
-                            output = "-- Filtered --"
-                            callback(output)
-                            output = "-- Vectorised --"
-                            callback(output)
-                            download_xml_by_id(extracted_xml_id, extracted_type, callback)
-                            try:
-                                if extracted_type == "artist":
-                                    extracted_name = artist_xml(extracted_xml_id)
-                                if extracted_type == "critic":
-                                    extracted_name = critic_xml(extracted_xml_id)
-                                if extracted_type == "definition":
-                                    extracted_name = definition_xml(extracted_xml_id)
-                                if extracted_type == "movement":
-                                    extracted_name = movement_xml(extracted_xml_id)
-                                if extracted_type == "influencer":
-                                    extracted_name = influencer_xml(extracted_xml_id)
-                            except Exception as e:
-                                print(f"Part - 2.1 : Unexpected error: {e}")
-                                output = f"Part - 2.1 : Unexpected error: {e}"
-                                callback(output)
-                                return "Failure"
-                            update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 3)
-                            try:
-                                update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 2)
-                            except Exception as e:
-                                print(f"Part - 2.2 : Unexpected error: {e}")
-                                output = f"Part - 2.2 : Unexpected error: {e}"
-                                callback(output)
-                                return "Failure"
-                            # vectorise(extracted_xml_id, extracted_type)
-                            update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 4)
-                            update_record(extracted_xml_id, extracted_name, 5)
-                        else:
-                            output = "-- Files are Same -- Skipping..."
-                            callback(output)
-                            try:
-                                update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 2)
-                            except Exception as e:
-                                print(f"Part - 2.3 : Unexpected error: {e}")
-                                output = f"Part - 2.3 : Unexpected error: {e}"
-                                callback(output)
-                                return "Failure"
-            output = f"\n\nMerged --> {merge_db(callback)}"
-            callback(output)
-            output = f"Completed !!!"
-            callback(output)
-        except Exception as e:
-            print(f"Part - 2 : Unexpected error: {e}")
-            output = f"Part - 2 : Unexpected error: {e}"
-            callback(output)
-            return "Failure"
-        # output = f"\n\nDeleted Existing  --> {delete_folder()}"
-        # callback(output)
-        # output = f"\n\nUpdated VectorDB --> {upload_files()}"
-        # callback(output)
-
-
-        print(f"Filtered paths extracted and stored in database.csv and Required Folder")
-        return "Success"
-
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching the page: {e}")
-        output = f"Error fetching the page: {e}"
-        callback(output)
-        return "Failure"
+        # Extract and filter paths from the links
+        paths = set()
+        for link in soup.find_all('a', href=True):
+            href = link['href']
+            full_url = urljoin(url, href)
+            path = urlparse(full_url).path
+            if any(filter_path in path for filter_path in filter_paths):
+                paths.add(path)
+        total_paths = len(paths)
     except Exception as e:
-        print(f"Unexpected error: {e}")
-        output = f"Unexpected error: {e}"
+        print(f"Part - 1 : Unexpected error: {e}")
+        output = f"Part - 1 : Unexpected error: {e}"
         callback(output)
-        return "Failure"
 
+    for path in paths:
+        output = ""
+        count += 1
+        if (count < 10000): # Limit the File Count and Check for the First 10 Files
+
+            # Splitting the string using "/" as the delimiter
+            segments = path.split("/")
+
+            # Extracting the first and second portions
+            extracted_type = segments[1]
+            extracted_id = segments[2]
+            extracted_xml_id = convert_to_underscore(extracted_id)
+
+            # Modify this condition to filter the required type / id
+            if extracted_type!="add condition here":
+            # if extracted_type=="critic":
+
+                output = f"=== Checking File {count} out of {total_paths} : {extracted_type} - {extracted_xml_id}"
+                callback(output)
+
+                #-----------------  NEW FILES  -------------------
+
+                # For New Files, Check ID in DB; if Not exist; then Download and Add to DB
+
+                if (is_value_in_csv(extracted_xml_id) == False):
+
+                    print(f"\nIts a New Value. Value : \"{extracted_xml_id}\" not Found in DB")
+
+                    # Downloading Files
+                    downloaded = download_xml_by_id(extracted_xml_id, extracted_type, callback)
+                    if (downloaded == False):
+                        print("\nDownload Failed, Going to the Next One...")
+                        continue
+
+                    record_to_add = [extracted_type, extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), " - ", " - ", "here_should_be_the_name"]
+                    add_record(record_to_add)
+                    print(f"\nAdded New Record for {extracted_xml_id}")
+
+                    try:
+                        # Filter and Store XML
+                        if extracted_type == "artist":
+                            extracted_name = artist_xml(extracted_xml_id)
+                        if extracted_type == "critic":
+                            extracted_name = critic_xml(extracted_xml_id)
+                        if extracted_type == "definition":
+                            extracted_name = definition_xml(extracted_xml_id)
+                        if extracted_type == "movement":
+                            extracted_name = movement_xml(extracted_xml_id)
+                        if extracted_type == "influencer":
+                            extracted_name = influencer_xml(extracted_xml_id)
+                    except Exception as e:
+                        print(f"Filtration Problem - XML Tags Different : Unexpected error: {e}")
+                        output = f"Filtration Problem - XML Tags Different : Unexpected error: {e}"
+                        callback(output)
+
+                    update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 3)
+                    print(f"\nUpdated Exisitng Record for {extracted_xml_id}")
+                    # vectorise(extracted_xml_id, extracted_type)
+                    update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 4)
+                    print(extracted_xml_id)
+                    update_record(extracted_xml_id, extracted_name, 5)
+
+    #                 output = "-- New File Detected ..."
+    #                 callback(output)
+    #                 output = "-- Downloaded --"
+    #                 callback(output)
+    #                 output = "-- Filtered --"
+    #                 callback(output)
+    #                 output = "-- Vectorised --"
+    #                 callback(output)
+
+    #             if (are_xml_files_equal(extracted_xml_id, extracted_type) ==  False):
+    #                 output = "-- Files are Different --"
+    #                 callback(output)
+    #                 output = "-- Downloaded --"
+    #                 callback(output)
+    #                 output = "-- Filtered --"
+    #                 callback(output)
+    #                 output = "-- Vectorised --"
+    #                 callback(output)
+    #                 download_xml_by_id(extracted_xml_id, extracted_type, callback)
+    #                 if extracted_type == "artist":
+    #                     extracted_name = artist_xml(extracted_xml_id)
+    #                 if extracted_type == "critic":
+    #                     extracted_name = critic_xml(extracted_xml_id)
+    #                 if extracted_type == "definition":
+    #                     extracted_name = definition_xml(extracted_xml_id)
+    #                 if extracted_type == "movement":
+    #                     extracted_name = movement_xml(extracted_xml_id)
+    #                 if extracted_type == "influencer":
+    #                     extracted_name = influencer_xml(extracted_xml_id)
+    #                 update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 3)
+    #                 try:
+    #                     update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 2)
+    #                 except Exception as e:
+    #                     print(f"Part - 2.2 : Unexpected error: {e}")
+    #                     output = f"Part - 2.2 : Unexpected error: {e}"
+    #                     callback(output)
+    #                 # vectorise(extracted_xml_id, extracted_type)
+    #                 update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 4)
+    #                 update_record(extracted_xml_id, extracted_name, 5)
+    #             else:
+    #                 output = "-- Files are Same -- Skipping..."
+    #                 callback(output)
+    #                 update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 2)
+    # output = f"\n\nMerged --> {merge_db(callback)}"
+    # callback(output)
+    # output = f"Completed !!!"
+    # callback(output)
+    # # output = f"\n\nDeleted Existing  --> {delete_folder()}"
+    # # callback(output)
+    # # output = f"\n\nUpdated VectorDB --> {upload_files()}"
+    # # callback(output)
+                    
+# ----------------------------------------------------------------------------------------------------------------------------
+
+
+    print(f"Filtered paths extracted and stored in database.csv and Required Folder")
+    return "Success"
 
 def start_my_function(callback):
     # thread = Thread(target=my_function, args=(callback,))
@@ -400,18 +360,3 @@ def start_my_function(callback):
     thread.start()
 
 # filter_and_store_paths()
-
-
-
-# def my_function(callback):
-#     #     output = f'''count -- > {i} '''
-#     #     yield output
-#     for i in range(1,10000):
-#         # addd a result pop here every tome from the second time onwards
-#         output = i
-#         time.sleep(0.3)
-#         # Emit the output to the frontend
-#         callback(output)
-#         time.sleep(0.7)
-#         output = f'''count -- > {i} '''
-#         callback(output)
