@@ -296,53 +296,53 @@ def filter_and_store_paths(callback):
                     print(extracted_xml_id)
                     update_record(extracted_xml_id, extracted_name, 5)
 
-    #                 output = "-- New File Detected ..."
-    #                 callback(output)
-    #                 output = "-- Downloaded --"
-    #                 callback(output)
-    #                 output = "-- Filtered --"
-    #                 callback(output)
-    #                 output = "-- Vectorised --"
-    #                 callback(output)
+                    output = "-- New File Detected ..."
+                    callback(output)
+                    output = "-- Downloaded --"
+                    callback(output)
+                    output = "-- Filtered --"
+                    callback(output)
+                    output = "-- Vectorised --"
+                    callback(output)
 
-    #             if (are_xml_files_equal(extracted_xml_id, extracted_type) ==  False):
-    #                 output = "-- Files are Different --"
-    #                 callback(output)
-    #                 output = "-- Downloaded --"
-    #                 callback(output)
-    #                 output = "-- Filtered --"
-    #                 callback(output)
-    #                 output = "-- Vectorised --"
-    #                 callback(output)
-    #                 download_xml_by_id(extracted_xml_id, extracted_type, callback)
-    #                 if extracted_type == "artist":
-    #                     extracted_name = artist_xml(extracted_xml_id)
-    #                 if extracted_type == "critic":
-    #                     extracted_name = critic_xml(extracted_xml_id)
-    #                 if extracted_type == "definition":
-    #                     extracted_name = definition_xml(extracted_xml_id)
-    #                 if extracted_type == "movement":
-    #                     extracted_name = movement_xml(extracted_xml_id)
-    #                 if extracted_type == "influencer":
-    #                     extracted_name = influencer_xml(extracted_xml_id)
-    #                 update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 3)
-    #                 try:
-    #                     update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 2)
-    #                 except Exception as e:
-    #                     print(f"Part - 2.2 : Unexpected error: {e}")
-    #                     output = f"Part - 2.2 : Unexpected error: {e}"
-    #                     callback(output)
-    #                 # vectorise(extracted_xml_id, extracted_type)
-    #                 update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 4)
-    #                 update_record(extracted_xml_id, extracted_name, 5)
-    #             else:
-    #                 output = "-- Files are Same -- Skipping..."
-    #                 callback(output)
-    #                 update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 2)
-    # output = f"\n\nMerged --> {merge_db(callback)}"
-    # callback(output)
-    # output = f"Completed !!!"
-    # callback(output)
+                if (are_xml_files_equal(extracted_xml_id, extracted_type) ==  False):
+                    output = "-- Files are Different --"
+                    callback(output)
+                    output = "-- Downloaded --"
+                    callback(output)
+                    output = "-- Filtered --"
+                    callback(output)
+                    output = "-- Vectorised --"
+                    callback(output)
+                    download_xml_by_id(extracted_xml_id, extracted_type, callback)
+                    if extracted_type == "artist":
+                        extracted_name = artist_xml(extracted_xml_id)
+                    if extracted_type == "critic":
+                        extracted_name = critic_xml(extracted_xml_id)
+                    if extracted_type == "definition":
+                        extracted_name = definition_xml(extracted_xml_id)
+                    if extracted_type == "movement":
+                        extracted_name = movement_xml(extracted_xml_id)
+                    if extracted_type == "influencer":
+                        extracted_name = influencer_xml(extracted_xml_id)
+                    update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 3)
+                    try:
+                        update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 2)
+                    except Exception as e:
+                        print(f"Part - 2.2 : Unexpected error: {e}")
+                        output = f"Part - 2.2 : Unexpected error: {e}"
+                        callback(output)
+                    # vectorise(extracted_xml_id, extracted_type)
+                    update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 4)
+                    update_record(extracted_xml_id, extracted_name, 5)
+                else:
+                    output = "-- Files are Same -- Skipping..."
+                    callback(output)
+                    update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 2)
+    output = f"\n\nMerged --> {merge_db(callback)}"
+    callback(output)
+    output = f"Completed !!!"
+    callback(output)
     # # output = f"\n\nDeleted Existing  --> {delete_folder()}"
     # # callback(output)
     # # output = f"\n\nUpdated VectorDB --> {upload_files()}"
