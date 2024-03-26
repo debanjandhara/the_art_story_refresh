@@ -1,11 +1,12 @@
 # Import necessary libraries
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_socketio import SocketIO
 from flask_cors import CORS, cross_origin
 from refresh.website_n_xml_utils import start_my_function
+from werkzeug.utils import secure_filename
 import time
 
-# import os
+import os
 
 # # Define the file path
 # file_path = "database.csv"
@@ -48,15 +49,32 @@ def index():
     return render_template('index.html')
 
 # --------------------- Make /upload_FAQ -----------
-# @app.route('/')
-# def index():
-#     return render_template('uploadFAQ.html')
+@app.route('/uploadFAQ', methods=['GET', 'POST'])
+def upload_faq():
+    if request.method == 'POST':
+        # Create data folder if it does not exist
+        if not os.path.exists('data'):
+            os.makedirs('data')
 
-# ------------------ Data Path ----------------
-# if not exist make data/ folder
-# if not exist make data/faq/ folder
-# if faq.txt exist delete file, create new one
-# ----------------------------------------
+        # Create faq folder if it does not exist
+        if not os.path.exists('data/faq'):
+            os.makedirs('data/faq')
+
+        # Check if the faq file already exists
+        if os.path.exists('data/faq/faq.txt'):
+            os.remove('data/faq/faq.txt')
+        
+        
+        # Get the file from the form
+        file = request.files['file']
+
+        # Save the file to data/faq folder
+        file.save(os.path.join('data/faq', file.filename))
+
+        return 'File uploaded successfully', 200
+
+    return render_template('uploadFAQ.html') 
+# ---------------------------------------------------
 
 # Define the function to be triggered when the button is clicked
 @socketio.on('trigger_function')
