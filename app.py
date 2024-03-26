@@ -68,8 +68,8 @@ def upload_faq():
         # Get the file from the form
         file = request.files['file']
 
-        # Save the file to data/faq folder
-        file.save(os.path.join('data/faq', file.filename))
+        # Save the file to data/faq folder with the name 'faq.txt'
+        file.save(os.path.join('data/faq', 'faq.txt'))
 
         return 'File uploaded successfully', 200
 
