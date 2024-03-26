@@ -47,6 +47,17 @@ CORS(app)
 def index():
     return render_template('index.html')
 
+# --------------------- Make /upload_FAQ -----------
+# @app.route('/')
+# def index():
+#     return render_template('uploadFAQ.html')
+
+# ------------------ Data Path ----------------
+# if not exist make data/ folder
+# if not exist make data/faq/ folder
+# if faq.txt exist delete file, create new one
+# ----------------------------------------
+
 # Define the function to be triggered when the button is clicked
 @socketio.on('trigger_function')
 def handle_trigger():
