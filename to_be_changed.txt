@@ -1,0 +1,14 @@
+1) Index.html --> Socket link
+2) app.py --> socket ssl path
+3) merge vector --> folder count
+4) website filter --> critic only
+
+
+-----
+
+task left --> delete all files and filtereing them again, this time with proper name at coloumn 5 
+upload and delete function of google drive
+
+chatbot section :
+download function of google cloud,
+use sessionID, to , and request ticket to process queries, and output them... pinecone coode check
