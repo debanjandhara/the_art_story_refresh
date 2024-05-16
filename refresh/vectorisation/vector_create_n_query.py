@@ -125,5 +125,5 @@ def refresh_vector(xml_id, type):
   delete_document(Merged_VectorStore, f"data\\filtered_txts\\{type}s\\{xml_id}.txt")
   delete_document(Merged_VectorStore, f"{xml_id}.txt")
   print("Deleted from VectorStore : ",f"data\\filtered_txts\\{type}s\\{xml_id}.txt")
-  add_to_vector(xml_id, type)
+  add_to_vector(type, xml_id)
   Merged_VectorStore.save_local(Merged_Vector_Path)

@@ -3,6 +3,13 @@ import csv
 from datetime import datetime
 
 
+csv_header = "Type,ID,last_checked,last_modified,last_vectorised,name"
+
+if not os.path.exists("database.csv"):
+    with open("database.csv", "w") as csv_file:
+        csv_file.write(csv_header + "\n")
+
+
 # Function to add a new record to the CSV file
 def add_record(record):
     csv_file = 'database.csv'
