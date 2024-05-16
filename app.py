@@ -15,32 +15,32 @@ import os
 
 # --------------- CODE FOR HANDLING FRESH DATA GENERATION ------------------
 
-# Define the file path
-file_path = "database.csv"
+# # Define the file path
+# file_path = "database.csv"
 
-# Check if the file already exists
-if os.path.exists(file_path):
-    # If it exists, delete the file
-    os.remove(file_path)
+# # Check if the file already exists
+# if os.path.exists(file_path):
+#     # If it exists, delete the file
+#     os.remove(file_path)
 
-# # Create a new file and write the header
-# with open(file_path, 'w') as file:
-#     file.write("Type,ID,last_checked,last_modified,last_vectorised,name\n")
+# # # Create a new file and write the header
+# # with open(file_path, 'w') as file:
+# #     file.write("Type,ID,last_checked,last_modified,last_vectorised,name\n")
 
-print("File created successfully:", file_path)
+# print("File created successfully:", file_path)
 
-# -----> For Deleting : Data Folder
+# # -----> For Deleting : Data Folder
 
-import shutil
+# import shutil
 
-# Specify the path of the folder to be deleted
-folder_path = "data"
+# # Specify the path of the folder to be deleted
+# folder_path = "data"
 
-# Delete the folder and its contents
-if os.path.exists(folder_path):
-    shutil.rmtree(folder_path)
+# # Delete the folder and its contents
+# if os.path.exists(folder_path):
+#     shutil.rmtree(folder_path)
 
-print("Folder deleted successfully:", folder_path)
+# print("Folder deleted successfully:", folder_path)
 
 # ----------------------------------------------------------------------------------
 
