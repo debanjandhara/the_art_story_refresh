@@ -318,8 +318,8 @@ def filter_and_store_paths(callback):
             # ================  CONDITION IS HERE ======================
             #===========================================================
             # Modify this condition to filter the required type / id
-            # if extracted_type!="add condition here":
-            if extracted_type=="critic":
+            if extracted_type!="add condition here":
+            # if extracted_type=="critic":
 
                 output = f"\n\n==> Checking File {count} out of {total_paths} : {extracted_type} - {extracted_xml_id}"
                 callback(output)
