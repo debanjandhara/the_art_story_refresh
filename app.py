@@ -47,8 +47,13 @@ import os
 
 # -------------------------- Log File Mgmt -------------------------------
 log_file_path = "data/log.txt"
+
 if not os.path.exists("data"):
     os.makedirs("data")
+
+if not os.path.exists("data/log.txt"):
+        with open("data/log.txt", "w") as log_file:
+            log_file.write("")
 
 logging.basicConfig(
     level=logging.INFO,
