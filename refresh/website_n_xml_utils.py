@@ -234,6 +234,16 @@ def filter_and_store_paths(callback):
     if not os.path.exists("data/raw_xmls/movements"):
         os.makedirs("data/raw_xmls/movements")
 
+    if not os.path.exists("data/log.txt"):
+        with open("data/log.txt", "w") as log_file:
+            log_file.write("")
+    
+    csv_header = "Type,ID,last_checked,last_modified,last_vectorised,name"
+
+    if not os.path.exists("database.csv"):
+        with open("database.csv", "w") as csv_file:
+            csv_file.write(csv_header + "\n")
+
     if not os.path.exists("data/faq"):
         os.makedirs("data/faq")
     if not os.path.exists("data/faq/faq.txt"):
