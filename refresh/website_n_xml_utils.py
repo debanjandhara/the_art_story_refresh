@@ -242,7 +242,7 @@ def filter_and_store_paths(callback):
 
     if not os.path.exists("database.csv"):
         with open("database.csv", "w") as csv_file:
-            csv_file.write(csv_header + "\n")
+            csv_file.write(csv_header)
 
     if not os.path.exists("data/faq"):
         os.makedirs("data/faq")
