@@ -169,6 +169,6 @@ def handle_trigger():
 
 if __name__ == '__main__':
     # --> 👇 For Dev Mode Testing
-    socketio.run(app, debug=True, host='0.0.0.0', port=5000, ssl_context='adhoc', allow_unsafe_werkzeug=True)
+    # socketio.run(app, debug=True, host='0.0.0.0', port=5000, ssl_context='adhoc', allow_unsafe_werkzeug=True)
     # --> 👇 For Prod/Deployment Mode 
-    # socketio.run(app, host='0.0.0.0', port=5000, ssl_context=('cert.pem', 'key.pem'), allow_unsafe_werkzeug=True)
+    socketio.run(app, host='0.0.0.0', port=5000, ssl_context=('cert.pem', 'key.pem'), allow_unsafe_werkzeug=True)
