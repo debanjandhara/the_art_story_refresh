@@ -27,9 +27,9 @@
     </div>
     
     <script>
-        var socket = io.connect('https://dev.refresh.theartstory.org/');
+        // var socket = io.connect('https://dev.refresh.theartstory.org/');
         // var socket = io.connect('https://dd9a-103-211-134-81.ngrok-free.app');
-        // var socket = io.connect('https://' + document.domain + ':' + location.port);
+        var socket = io.connect('https://' + document.domain + ':' + location.port);
 
         // Function to disable the button and change its appearance
         function disableButton(button) {

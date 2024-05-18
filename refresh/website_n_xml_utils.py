@@ -308,8 +308,8 @@ def filter_and_store_paths(callback):
             # ================  CONDITION IS HERE ======================
             #===========================================================
             # Modify this condition to filter the required type / id
-            if extracted_type!="add condition here":
-            # if extracted_type=="critic":
+            # if extracted_type!="add condition here":
+            if extracted_type=="critic":
 
                 output = f"\n\n==> Checking File {count} out of {total_paths} : {extracted_type} - {extracted_xml_id}"
                 callback(output)
@@ -408,7 +408,7 @@ def filter_and_store_paths(callback):
     callback(output)
     output = f"\n\nUploading Updated VectorDatabase To Cloud --> {upload_merged_vector()}"
     callback(output)
-    output = f"\n\nnUploading modified database.csv To Cloud --> {del_n_upload_csv_database()}"
+    output = f"\n\nUploading modified database.csv To Cloud --> {del_n_upload_csv_database()}"
     callback(output)
 
     output = f"\n\n--------------------\n\nCompleted !!!\n\n-------------------------"
