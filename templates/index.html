@@ -28,25 +28,46 @@
     
     <script>
         var socket = io.connect('https://dev.refresh.theartstory.org/');
-        // var socket = io.connect('https://67bd-14-194-176-244.ngrok-free.app/');
+        // var socket = io.connect('https://dd9a-103-211-134-81.ngrok-free.app');
         // var socket = io.connect('https://' + document.domain + ':' + location.port);
+
+        // Function to disable the button and change its appearance
+        function disableButton(button) {
+            button.disabled = true;
+            button.style.backgroundColor = '#a0aec0'; // Grey color for disabled
+            button.style.color = '#808080'; // Grey text for disabled
+        }
+
+        // Function to enable the button and restore its appearance
+        function enableButton(button) {
+            button.disabled = false;
+            button.style.backgroundColor = '#3182ce'; // Original blue color
+            button.style.color = '#ffffff'; // White text
+        }
 
         // Function to trigger the backend function
         function triggerFunction() {
             var button = document.getElementById('triggerButton');
 
-            // Disable the button in grey color
-            button.disabled = true;
-            button.style.backgroundColor = '#a0aec0'; // Grey color
+            // Disable the button when the function is triggered
+            disableButton(button);
 
-            // Enable the button after 60 seconds
-            setTimeout(function() {
-                button.disabled = false;
-                button.style.backgroundColor = 'bg-blue-500'; // Restore original color
-            }, 60000);
-
+            // Emit the event to trigger the backend function
             socket.emit('trigger_function');
         }
+
+        // Event listener for the 'update_response' event from the backend
+        socket.on('update_response', function(data) {
+            console.log('Received update response:', data);
+
+            var button = document.getElementById('triggerButton');
+
+            // Once the server responds, wait 15 seconds to re-enable the button
+            setTimeout(function() {
+            enableButton(button);
+            }, 15000); // 15-second delay
+        });
+
 
         var responseBox = document.getElementById('responseBox');
         var scrollingDown = true;

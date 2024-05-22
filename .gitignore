@@ -3,6 +3,10 @@ data/
 database.csv
 database_backup.csv
 
+# LocalHost Files and Folder
+output.csv
+output_server.csv
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

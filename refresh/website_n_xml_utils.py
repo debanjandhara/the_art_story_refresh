@@ -1,4 +1,6 @@
 import os
+import re
+import json
 import requests
 import time
 from datetime import datetime
@@ -10,109 +12,32 @@ from .xml_filtration.format_critic_xml import *
 from .xml_filtration.format_definition_xml import *
 from .xml_filtration.format_influencer_xml import *
 from .xml_filtration.format_movement_xml import *
-from .test import *
 
-import time
+
+import threading
 from threading import Thread
 
-# -------------------------------------------
+function_lock = threading.Lock()
+
+# ------- GCloud Storage Configuration ----------
 
 # import packages
-from google.cloud import storage
 import os
 from os import listdir
 from os.path import isfile, join
 from dotenv import load_dotenv
+from google.cloud import storage
 
-# set key credentials file path
+# key credentials file path
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "env/ai-chatbot-412021-e1606cdc6784.json"
 
 bucketName = "tas-website-data"
 
 # -------------------------------------------
 
-def download_xml_by_id(xml_id, type, callback):
-    xml_url = f"https://www.theartstory.org/data/content/{type}/{xml_id}.xml"
-    output_folder = f"data/raw_xmls/{type}s"
-    output_file = f"data/raw_xmls/{type}s/{xml_id}.xml"
-    try:
-        # Make a GET request to the XML URL
-        try:
-            response = requests.get(xml_url, timeout=5)
-        except Exception as e:
-            print(f"Download Function Error : {e}")
-            output = f"Download Function Error : {e}"
-            callback(output)
-            return False
+# ------------ GCloud Files Access / Modify Functions ----------------
 
-        # Check if the request was successful (status code 200)
-        if response.status_code == 200:
-            # Open the output file in binary write mode and write the XML content
-            if not os.path.exists(output_folder):
-                os.makedirs(output_folder)
-            
-            if os.path.exists(output_file):
-                # If it exists, delete the file
-                os.remove(output_file)
-                print(f"Deleted existing file: {output_file}")
-            else:
-                print("File Doesn't Exists")
-            
-            with open(output_file, 'wb') as file:
-                file.write(response.content)
-            
-            print(f"XML downloaded successfully and saved at {output_file}")
-            return True
-        else:
-            print(f"Error: Unable to download XML. Status Code: {response.status_code}")
-            output = f"Error: Unable to download XML. Status Code: {response.status_code}"
-            callback(output)
-            return False
-    except Exception as e:
-        print(f"Error: {e}")
-        return False
-
-
-
-import re
-import json
-
-import re
-import json
-
-def convert_to_underscore(input_string):
-    # Using regex to replace hyphens with underscores
-    result_string = re.sub(r'[-]', '_', input_string)
-    print(result_string.encode('utf-8'))
-    return result_string
-
-
-def are_xml_files_equal(xml_id, type):
-
-    import xml.etree.ElementTree as ET
-
-    online_url = f"https://www.theartstory.org/data/content/{type}/{xml_id}.xml"
-    local_path = f"data/raw_xmls/{type}s/{xml_id}.xml"
-    
-    # Fetch online XML
-    online_response = requests.get(online_url)
-    online_tree = ET.ElementTree(ET.fromstring(online_response.content))
-
-    # Read locally stored XML
-    with open(local_path, 'rb') as local_file:
-        local_tree = ET.ElementTree(ET.fromstring(local_file.read()))
-    
-    similarity_response = ET.tostring(online_tree.getroot()) == ET.tostring(local_tree.getroot())
-    
-    if similarity_response == True:
-        print(f"{xml_id} --> Files are Same")
-    else:
-        print(f"{xml_id} --> Files are Different")
-
-    # Compare the XML structures
-    return similarity_response
-
-def delete_folder(bucket_name = bucketName):
+def delete_merged_vector(bucket_name = bucketName):
 
     import os
     from google.cloud import storage
@@ -134,7 +59,7 @@ def delete_folder(bucket_name = bucketName):
     print(f"Folder '{folder_name}' deleted successfully.")
     return "Successfull !!!"
 
-def upload_files(bucket_name = bucketName):
+def upload_merged_vector(bucket_name = bucketName):
 
     import os
     from google.cloud import storage
@@ -168,7 +93,113 @@ def upload_files(bucket_name = bucketName):
     
     return "Successfull !!!"
 
+def del_n_upload_csv_database(bucket_name = bucketName):
+
+    local_file_path = "database.csv"
+    gcs_file_name = "database.csv"
+
+    # Initialize a Google Cloud Storage client
+    client = storage.Client()
+
+    # Get the bucket object
+    bucket = client.get_bucket(bucket_name)
+
+    # Delete the existing file from GCS if it exists
+    blob = bucket.get_blob(gcs_file_name)
+    if blob:
+        blob.delete()
+        print(f"Deleted '{gcs_file_name}' from GCS.")
+
+    # Upload the new file from the local path to GCS
+    new_blob = bucket.blob(gcs_file_name)
+    new_blob.upload_from_filename(local_file_path)
+    print(f"Uploaded '{local_file_path}' to '{gcs_file_name}' in GCS.")
+
+    # Return True to indicate success
+    return "Successfull !!!"
+
+# -------------------------------------------------
+
+
+
+# -------------------- Dependencies for the Main Function ----------------
+
+def download_xml_by_id(xml_id, type, callback):
+    xml_url = f"https://www.theartstory.org/data/content/{type}/{xml_id}.xml"
+    output_folder = f"data/raw_xmls/{type}s"
+    output_file = f"data/raw_xmls/{type}s/{xml_id}.xml"
+    try:
+        # Make a GET request to the XML URL
+        try:
+            response = requests.get(xml_url, timeout=5)
+        except Exception as e:
+            print(f"Download Function Error - Python Requests Library Error : {e}")
+            output = f"Download Function Error - Python Requests Library Error : {e}"
+            callback(output)
+            return False
+
+        # Check if the request was successful (status code 200)
+        if response.status_code == 200:
+            # Open the output file in binary write mode and write the XML content
+            if not os.path.exists(output_folder):
+                os.makedirs(output_folder)
+            
+            if os.path.exists(output_file):
+                os.remove(output_file)
+            
+            with open(output_file, 'wb') as file:
+                file.write(response.content)
+            
+            print(f"XML downloaded successfully and saved at {output_file}")
+            return True
+        else:
+            print(f"Error: Unable to download XML. Status Code: {response.status_code}")
+            output = f"Error: Unable to download XML. Status Code: {response.status_code}"
+            callback(output)
+            return False
+    except Exception as e:
+        print(f"Error: {e}")
+        return False
+
+def convert_to_underscore(input_string):
+    # Using regex to replace hyphens with underscores
+    result_string = re.sub(r'[-]', '_', input_string)
+    return result_string
+
+def are_xml_files_equal(xml_id, type):
+
+    import xml.etree.ElementTree as ET
+
+    online_url = f"https://www.theartstory.org/data/content/{type}/{xml_id}.xml"
+    local_path = f"data/raw_xmls/{type}s/{xml_id}.xml"
+    
+    # Fetch online XML
+    online_response = requests.get(online_url)
+    online_tree = ET.ElementTree(ET.fromstring(online_response.content))
+
+    # Read locally stored XML
+    with open(local_path, 'rb') as local_file:
+        local_tree = ET.ElementTree(ET.fromstring(local_file.read()))
+    
+    similarity_response = ET.tostring(online_tree.getroot()) == ET.tostring(local_tree.getroot())
+    
+    if similarity_response == True:
+        print(f"{xml_id} - No Changes Found")
+    else:
+        print(f"{xml_id} - Changes are Found")
+
+    # Compare the XML structures
+    return similarity_response
+
+# ---------------------------------------------------------------
+
+
+
+# -----------------  MAIN DRIVER FUNCTION -----------------------
+
 def filter_and_store_paths(callback):
+
+    output = ""      # Sends to WebSocket
 
     import requests
     from bs4 import BeautifulSoup
@@ -203,6 +234,39 @@ def filter_and_store_paths(callback):
     if not os.path.exists("data/raw_xmls/movements"):
         os.makedirs("data/raw_xmls/movements")
 
+    if not os.path.exists("data/log.txt"):
+        with open("data/log.txt", "w") as log_file:
+            log_file.write("")
+    
+    csv_header = "Type,ID,last_checked,last_modified,last_vectorised,name"
+
+    if not os.path.exists("database.csv"):
+        with open("database.csv", "w") as csv_file:
+            csv_file.write(csv_header)
+
+    if not os.path.exists("data/faq"):
+        os.makedirs("data/faq")
+    if not os.path.exists("data/faq/faq.txt"):
+        with open("data/faq/faq.txt", "w") as faq_file:
+            faq_file.write("Sample FAQ File")
+            output = f"Built Sample FAQ File"
+            callback(output)
+    else:
+        output = f"Found FAQ File"
+        callback(output)
+    
+    if not os.path.exists("data/merged_vector/index.faiss"):
+        first_vectorise()
+        print(f"FAQ File Vectorised")
+        output = f"FAQ File Vectorised"
+        callback(output)
+    else:
+        refresh_faq_vector()
+        print(f"FAQ File Updated and Vectorised")
+        output = f"FAQ File Updated and Vectorised"
+        callback(output)
+    
+
     # Define the URL to scrape
     url = "https://www.theartstory.org/sitemap.htm"
 
@@ -230,9 +294,13 @@ def filter_and_store_paths(callback):
                 paths.add(path)
         total_paths = len(paths)
     except Exception as e:
-        print(f"Part - 1 : Unexpected error: {e}")
-        output = f"Part - 1 : Unexpected error: {e}"
+        print(f"Part - 1 : Error in Sitemap Scrapping : {e}")
+        output = f"Part - 1 : Error in Sitemap Scrapping : {e}"
         callback(output)
+    
+    print(f"Successfully Scraped Sitemap... Extracting Data...")
+    output = f"Successfully Scraped Sitemap... Extracting Data..."
+    callback(output)
 
     for path in paths:
         output = ""
@@ -247,12 +315,15 @@ def filter_and_store_paths(callback):
             extracted_id = segments[2]
             extracted_xml_id = convert_to_underscore(extracted_id)
 
+            # ================  CONDITION IS HERE ======================
+            #===========================================================
             # Modify this condition to filter the required type / id
             if extracted_type!="add condition here":
             # if extracted_type=="critic":
 
-                output = f"=== Checking File {count} out of {total_paths} : {extracted_type} - {extracted_xml_id}"
+                output = f"\n\n==> Checking File {count} out of {total_paths} : {extracted_type} - {extracted_xml_id}"
                 callback(output)
+                
 
                 #-----------------  NEW FILES  -------------------
 
@@ -260,17 +331,20 @@ def filter_and_store_paths(callback):
 
                 if (is_value_in_csv(extracted_xml_id) == False):
 
-                    print(f"\nIts a New Value. Value : \"{extracted_xml_id}\" not Found in DB")
+                    print(f"New Value : {extracted_type} - {extracted_xml_id}. NOT Found in DB")
+                    output = f"New File Detected : {extracted_type} - {extracted_xml_id}"
+                    callback(output)
 
                     # Downloading Files
                     downloaded = download_xml_by_id(extracted_xml_id, extracted_type, callback)
                     if (downloaded == False):
                         print("\nDownload Failed, Going to the Next One...")
                         continue
+                    output = "Successfully Downloaded."
+                    callback(output)
 
                     record_to_add = [extracted_type, extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), " - ", " - ", "here_should_be_the_name"]
                     add_record(record_to_add)
-                    print(f"\nAdded New Record for {extracted_xml_id}")
 
                     try:
                         # Filter and Store XML
@@ -288,75 +362,78 @@ def filter_and_store_paths(callback):
                         print(f"Filtration Problem - XML Tags Different : Unexpected error: {e}")
                         output = f"Filtration Problem - XML Tags Different : Unexpected error: {e}"
                         callback(output)
+                    output = "Successsfully Filtered."
+                    callback(output)
 
                     update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 3)
-                    print(f"\nUpdated Exisitng Record for {extracted_xml_id}")
-                    # vectorise(extracted_xml_id, extracted_type)
                     update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 4)
-                    print(extracted_xml_id)
                     update_record(extracted_xml_id, extracted_name, 5)
 
-                    output = "-- New File Detected ..."
-                    callback(output)
-                    output = "-- Downloaded --"
-                    callback(output)
-                    output = "-- Filtered --"
-                    callback(output)
-                    output = "-- Vectorised --"
+                    add_to_vector(extracted_xml_id, extracted_type)
+                    output = "Successsfully Vectorised."
                     callback(output)
 
                 if (are_xml_files_equal(extracted_xml_id, extracted_type) ==  False):
-                    output = "-- Files are Different --"
+                    output = f"Change Detected : {extracted_type} - {extracted_xml_id}"
                     callback(output)
-                    output = "-- Downloaded --"
-                    callback(output)
-                    output = "-- Filtered --"
-                    callback(output)
-                    output = "-- Vectorised --"
-                    callback(output)
+
                     download_xml_by_id(extracted_xml_id, extracted_type, callback)
-                    if extracted_type == "artist":
-                        extracted_name = artist_xml(extracted_xml_id)
-                    if extracted_type == "critic":
-                        extracted_name = critic_xml(extracted_xml_id)
-                    if extracted_type == "definition":
-                        extracted_name = definition_xml(extracted_xml_id)
-                    if extracted_type == "movement":
-                        extracted_name = movement_xml(extracted_xml_id)
-                    if extracted_type == "influencer":
-                        extracted_name = influencer_xml(extracted_xml_id)
-                    update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 3)
+                    output = "Successfully Downloaded."
+                    callback(output)
+
                     try:
-                        update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 2)
+                        # Filter and Store XML
+                        if extracted_type == "artist":
+                            extracted_name = artist_xml(extracted_xml_id)
+                        if extracted_type == "critic":
+                            extracted_name = critic_xml(extracted_xml_id)
+                        if extracted_type == "definition":
+                            extracted_name = definition_xml(extracted_xml_id)
+                        if extracted_type == "movement":
+                            extracted_name = movement_xml(extracted_xml_id)
+                        if extracted_type == "influencer":
+                            extracted_name = influencer_xml(extracted_xml_id)
                     except Exception as e:
-                        print(f"Part - 2.2 : Unexpected error: {e}")
-                        output = f"Part - 2.2 : Unexpected error: {e}"
+                        print(f"Filtration Problem - XML Tags Different : Unexpected error: {e}")
+                        output = f"Filtration Problem - XML Tags Different : Unexpected error: {e}"
                         callback(output)
-                    # vectorise(extracted_xml_id, extracted_type)
+                    output = "Successsfully Filtered."
+                    callback(output)
+
+                    update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 3)
+                    update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 2)
                     update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 4)
                     update_record(extracted_xml_id, extracted_name, 5)
-                else:
-                    output = "-- Files are Same -- Skipping..."
-                    callback(output)
-                    update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 2)
-    output = f"\n\nMerged --> {merge_db(callback)}"
-    callback(output)
-    output = f"Completed !!!"
-    callback(output)
-    # # output = f"\n\nDeleted Existing  --> {delete_folder()}"
-    # # callback(output)
-    # # output = f"\n\nUpdated VectorDB --> {upload_files()}"
-    # # callback(output)
-                    
-# ----------------------------------------------------------------------------------------------------------------------------
 
+                    refresh_vector(extracted_xml_id, extracted_type)
+                    output = "Successfully Vectorised."
+                    callback(output)
+
+                else:
+                    update_record(extracted_xml_id, str(datetime.now().strftime("%d %B %Y %H:%M")), 2)
+                    output = f"NO Change Detected : {extracted_type} - {extracted_xml_id} - Skipping"
+                    callback(output)
+    
+    output = f"\n\nDeleting Existing VectorDatabase From Cloud  --> {delete_merged_vector()}"
+    callback(output)
+    output = f"\n\nUploading Updated VectorDatabase To Cloud --> {upload_merged_vector()}"
+    callback(output)
+    output = f"\n\nUploading modified database.csv To Cloud --> {del_n_upload_csv_database()}"
+    callback(output)
+
+    output = f"\n\n--------------------\n\nCompleted !!!\n\n-------------------------"
+    callback(output)
 
     print(f"Filtered paths extracted and stored in database.csv and Required Folder")
     return "Success"
 
-def start_my_function(callback):
-    # thread = Thread(target=my_function, args=(callback,))
-    thread = Thread(target=filter_and_store_paths, args=(callback,))
-    thread.start()
 
-# filter_and_store_paths()
+def start_my_function(callback):
+    if function_lock.locked():
+        return False
+
+    with function_lock:
+        thread = threading.Thread(target=filter_and_store_paths, args=(callback,))
+        thread.start()
+
+    return True

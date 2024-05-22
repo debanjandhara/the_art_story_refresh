@@ -4,47 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TheArtStory - Upload FAQ</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #f0f0f0;
-      }
-
-      form {
-        margin: 20px auto;
-        padding: 20px;
-        max-width: 400px;
-        background-color: #fff;
-        border-radius: 5px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-
-      input[type="file"] {
-        margin-bottom: 10px;
-      }
-      input[type="file"]:hover {
-        cursor: pointer;
-      }
-
-      input[type="submit"] {
-        background-color: #007bff;
-        color: #fff;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-      }
-
-      input[type="submit"]:hover {
-        background-color: #0056b3;
-      }
-    </style>
+    <!-- Include Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
-  <form method="post" action="/uploadFAQ" enctype="multipart/form-data">
-    <input type="file" name="file" id="file">
-    <input type="submit" value="Upload">
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <div class="max-w-lg w-full bg-white p-8 rounded-lg shadow-lg text-center">
+    <!-- File Upload Form -->
+    <form method="post" action="/uploadFAQ" enctype="multipart/form-data">
+      <h2 class="text-2xl font-bold mb-4">Upload Your File</h2>
+      <input type="file" name="file" id="file" class="mb-4 w-full border p-2 rounded-lg" />
+      <input type="submit" value="Upload" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 cursor-pointer" />
+    </form>
+
+    <!-- Success Message (to be shown after a successful upload) -->
+    <div id="uploadSuccessMessage" class="hidden bg-green-100 text-green-800 p-4 rounded-lg mt-6">
+      <strong>Success!</strong> File uploaded successfully.
+    </div>
+  </div>
+
+  <!-- Optional JavaScript to show success message after form submission -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const uploadSuccess = urlParams.get("uploadSuccess");
+
+        if (uploadSuccess === "true") {
+            document.getElementById("uploadSuccessMessage").classList.remove("hidden");
+        }
+    });
+  </script>
 </body>
 </html>

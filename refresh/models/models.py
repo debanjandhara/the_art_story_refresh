@@ -1,6 +1,6 @@
+import os
 import csv
 from datetime import datetime
-
 
 
 # Function to add a new record to the CSV file
